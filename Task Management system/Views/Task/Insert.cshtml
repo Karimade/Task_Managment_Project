@@ -1,0 +1,61 @@
+﻿@model Task_Management_system.Models.Task
+@{
+}
+<h1>Insert New Task</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Insert" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+             <div class="form-group">
+                <label asp-for="DueDate" class="control-label"></label>
+                <input asp-for="DueDate" class="form-control" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Attachment" class="control-label"></label>
+                <input type="file" asp-for="File"  class="form-control" />
+                <span asp-validation-for="File" class="text-danger"></span>
+            </div> 
+            <div class="form-group">
+            <label asp-for="ProjectId" class="control-label"></label>
+                <select asp-for="ProjectId" class="form-control" asp-items="@ViewBag.ProjectId"></select>
+            </div>
+              <div class="form-group">
+                <label  class="control-label"></label>
+                <select name="AssignedUsers" asp-for="UserTasks" asp-items="@ViewBag.usersList" multiple="multiple" class="form-control"></select>
+            </div>
+          
+
+                <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to Project List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+            
+    
+}
+
+
+

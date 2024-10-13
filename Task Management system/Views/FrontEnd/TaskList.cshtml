@@ -1,0 +1,81 @@
+﻿@model IEnumerable<Task_Management_system.Models.Task>
+
+<h1>Tasks List</h1>
+
+
+<form method="post" asp-action="TaskList">
+    <div>
+        <label for="projectId">Select Project:</label>
+        <select name="projectId" id="projectId">
+            <option value="">Select Project</option>
+            @foreach (var project in (IEnumerable<Project>)ViewBag.Projects)
+            {
+                <option value="@project.ProjectId">@project.Name</option>
+            }
+        </select>
+        <br />
+        <span style="color:darkred">@ViewBag.OldProjectName</span>
+    </div>
+
+    <div>
+        <label for="userId">Select User:</label>
+        <select name="userId" id="userId">
+            <option value="">Select User</option>
+            @foreach (var user in (IEnumerable<User>)ViewBag.Users)
+            {
+                <option value="@user.UserId">@user.Name</option>
+            }
+        </select>
+        <br />
+        <span style="color:darkred">@ViewBag.OldUserName</span>
+    </div>
+
+    <div>
+        <label for="dueDateFrom">Due Date From:</label>
+        <input type="date" name="dueDateFrom" id="dueDateFrom" placeholder="Due Date From" />
+        <br />
+        <span style="color:darkred">@ViewBag.OldDateFrom</span>
+    </div>
+
+    <div>
+        <label for="dueDateTo">Due Date To:</label>
+        <input type="date" name="dueDateTo" id="dueDateTo" placeholder="Due Date To" />
+        <br />
+        <span style="color:darkred">@ViewBag.OldDateTo</span>
+    </div>
+
+    <button class="btn btn-primary" style="color:burlywood" type="submit">Filter</button>
+</form>
+
+
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in Model)
+        {
+            <tr class="table-active">
+                <td>@task.Name</td>
+                <td>@task.Description</td>
+
+               
+            <td>
+                    <a style="color:darkorange" asp-action="TaskDetails" asp-route-taskId="@task.TaskId">Task Details</a>
+        </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+
+

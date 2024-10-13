@@ -1,0 +1,50 @@
+﻿@model Task_Management_system.Models.SubTask
+
+<h1>Sub Task Details</h1>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">DueDate</th>
+            <th scope="col">AssignedUsers</th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+        <tr class="table-active">
+           
+            <td>@Model.Name</td>
+            <td>@Model.Description</td>
+            <td>@Model.DueDate</td>
+            <td>
+                <ul>
+                    @if (Model.Users != null)
+                    {
+                        @foreach (var user in Model.Users)
+                        {
+                            if (user.Name != null)
+                            {
+
+                                <li>@user.Name  </li>
+                            }
+                            else { throw new Exception(); }
+                        }
+                    }
+                </ul>
+            </td>
+
+            <td>
+               
+
+                <a asp-action="TaskDetails" asp-route-taskId="@Model.TaskId">Go Back</a>
+            </td>
+        </tr>
+        <a asp-action="TaskList" class="btn btn-secondary">Back To Task List</a>
+    </tbody>
+</table>
+
+
+

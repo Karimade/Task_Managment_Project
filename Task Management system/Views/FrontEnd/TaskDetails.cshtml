@@ -1,0 +1,74 @@
+﻿@model Task_Management_system.Models.Task
+
+
+<h1>Task Details</h1>
+
+
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">DueDate</th>
+            <th scope="col">Attachment</th>
+            <th scope="col">Project</th>
+            <th scope="col">AssignedUsers</th>
+            <th scope="col">SubTasks</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+       
+            <tr class="table-active">
+                <td>@Model.Name</td>
+            <td>@Model.Description</td>
+            <td>@Model.DueDate</td>
+            <td>@Model.Attachment</td>
+            <td>@Model.Project?.Name</td>
+                <td>
+                    <ul>
+                    @if (Model.UserTasks != null)
+                        {
+                        @foreach (var user in Model.UserTasks)
+                            {
+                                if (user.User.Name != null)
+                                {
+
+                                    <li>@user.User.Name  </li>
+                                }
+                                else { throw new Exception(); }
+                            }
+                        }
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                    @foreach (var sub in Model.SubTasks)
+                        {
+                            if (sub.Name != null)
+                            {
+                                <li>
+                                <a style="color:cornflowerblue" asp-action="SubTaskDetails" asp-route-subTaskId="@sub.SubTaskId">@sub.Name</a>
+                                    
+                                </li>
+                            }
+                            else { throw new Exception(); }
+                        
+                        }
+                    </ul>
+                </td>
+
+
+
+                <td>
+                    <a asp-action="TaskList" >Go Back</a>
+                </td>
+            </tr>
+        
+    </tbody>
+</table>
+
+
+

@@ -1,0 +1,81 @@
+﻿@model IEnumerable<Task_Management_system.Models.Task>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<h1>Available Tasks</h1>
+
+<table class="table table-hover">
+    <thead>
+        <tr class="table-info">
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">DueDate</th>
+            <th scope="col">Attachment</th>
+            <th scope="col">Project</th>
+            <th scope="col">AssignedUsers</th>
+            <th scope="col">SubTasks</th>
+            <th scope="col"> </th>
+            <th scope="col"> </th>
+            <th scope="col"> </th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        
+
+        @foreach (var item in Model)
+        {
+            <tr class="table-active">
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>@item.DueDate</td>
+                <td>@item.Attachment</td>
+                <td>@item.Project.Name</td>
+                <td>
+                    <ul>
+                    @if (item.UserTasks != null) 
+                    {
+                        @foreach (var user in item.UserTasks)
+                        {
+                            if(user.User.Name != null)
+                            {
+                                    
+                              <li>@user.User.Name  </li>  
+                                }
+                                else { throw new Exception(); }
+                        }
+                    }
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        @foreach(var sub in item.SubTasks)
+                        {
+                            if (sub.Name != null)
+                            {
+                                <li>@sub.Name</li>
+                            }else{ throw new Exception(); }
+                        }
+                    </ul>
+                </td>
+                <td>
+                    <a style="color:orange" asp-action="Edit" asp-route-TaskId="@item.TaskId"> Edit</a>
+                   
+                </td>
+                <td>
+                    <a style="color:lightgreen" asp-action="AddSubTask" asp-route-TaskId="@item.TaskId"> Add SubTask</a>
+                </td>
+                <td>
+                    <a style="color:red" asp-action="Delete" asp-route-Id="@item.TaskId"> Delete</a>
+
+                </td>
+
+            </tr>
+        }
+    </tbody>
+    <div button>
+        <a class="btn btn-primary"  style="color:green" asp-action="Insert"> Insert New</a>
+
+    </div>

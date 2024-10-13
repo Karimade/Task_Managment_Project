@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Project>
+@{
+	ViewData["Title"] = "Index";
+}
+<h1>Available Projects</h1>
+
+<table class="table table-hover">
+    <thead>
+        <tr class="table-info">
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach( var item in Model)
+        {
+        <tr class="table-active">
+            <td>@item.Name</td>
+            <td>@item.Description</td>
+                <td>
+                    <a style="color:orange" asp-action="Edit" asp-route-id="@item.ProjectId"> Edit</a>
+                    <a style="color:red" asp-action="Delete" asp-route-id="@item.ProjectId"> Delete</a>
+                </td>
+
+        </tr>
+        }
+    </tbody>
+    <div button>
+        <a class="btn btn-primary"  style="color:green" asp-action="Insert"> Insert New</a>
+
+    </div>
+</table>
