@@ -4,10 +4,11 @@ using Task = Task_Management_system.Models.Task;
 using Newtonsoft.Json;
 namespace Task_Management_system.Data;
 
+// This class used for interacting with the API, Getting the data from it , Deserializing it
     public class ApiService
     {
+        //Used for making requests to the api
         private readonly HttpClient _httpClient;
-
         public ApiService(HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -19,7 +20,6 @@ namespace Task_Management_system.Data;
     {
         string apiUrl = $"api/TaskApi?projectId={projectId}&userId={userId}&dueDateFrom={dueDateFrom}&dueDateTo={dueDateTo}";
         var response = _httpClient.GetAsync(apiUrl).Result;
-
         if (response.IsSuccessStatusCode)
         {
             
