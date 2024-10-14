@@ -15,8 +15,8 @@ namespace Task_Management_system.Controllers
             _apiService = apiService;
             _UOW = UOW;
         }
+        
         // Task List View
-
         public IActionResult TaskList()
         {
             var users = _UOW.users.GetAll();
@@ -25,8 +25,7 @@ namespace Task_Management_system.Controllers
             ViewBag.Projects = projects;
            var tasks =  _UOW.tasks.GetAll(query => query.Include(t => t.UserTasks).ThenInclude(su => su.User)
                                             .Include(t=>t.SubTasks).Include(t=>t.Project));
-
-                                                   
+                                            
             return View(tasks);
         }
         [HttpPost]
@@ -56,9 +55,10 @@ namespace Task_Management_system.Controllers
             
             ViewBag.OldDateFrom = dueDateFrom;
             ViewBag.OldDateTo = dueDateTo;
-            
-            IEnumerable<Task> tasks = _apiService.GetTasksFiltered(projectId, userId, dueDateFrom, dueDateTo);
 
+            // Sending data to the apiService class to send it to interact with the api
+            IEnumerable<Task> tasks = _apiService.GetTasksFiltered(projectId, userId, dueDateFrom, dueDateTo);
+            
             return View(tasks);
         }
 
