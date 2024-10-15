@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -21,6 +21,8 @@ namespace Task_Management_system.Controllers
             _host = host;
             _UOW = UOW;
         }
+
+        // List of tasks Action
         public IActionResult Index()
         {
 
@@ -31,8 +33,10 @@ namespace Task_Management_system.Controllers
             return View(tasks);
         }
 
+        // Insert a new task Action
         public IActionResult Insert()
         {
+            // Making select lists
             IEnumerable<Project> projects = _UOW.projects.GetAll();
             ViewBag.ProjectId = new SelectList(projects, "ProjectId", "Name");
            
@@ -47,6 +51,7 @@ namespace Task_Management_system.Controllers
         {
             if (task != null && AssignedUsers != null)
             {
+                // Handling the Assigned users
                 foreach (var userId in AssignedUsers)
                 {
                     task.UserTasks.Add(new UserTask() {
@@ -56,6 +61,7 @@ namespace Task_Management_system.Controllers
                 }
                 if (ModelState.IsValid)
                 {
+                    // Handling the files
                     string fileName = string.Empty;
                     if(task.File != null)
                     {
@@ -73,7 +79,7 @@ namespace Task_Management_system.Controllers
             return View();
         }
 
-
+        // Edit a task Action
         public IActionResult Edit(int TaskId)
         {
             IEnumerable<Project> projects = _UOW.projects.GetAll();
@@ -83,21 +89,17 @@ namespace Task_Management_system.Controllers
             ViewBag.Users = new SelectList(users, "UserId", "Name", new { });
 
             // This takes long time when displaying the edit view
-            Task tbEditedTask = _UOW.tasks.GetTaskById(TaskId);
+            //Task tbEditedTask = _UOW.tasks.GetTaskById(TaskId);
 
-            // This takes less time , but it will not show the Old assignd users when editing 
-            //Task tbEditedTask = _UOW.tasks.GetAll("SubTasks.Users").FirstOrDefault(t => t.TaskId == TaskId);
+            // This takes less time , but it will not show the Old assigned users when editing 
+            Task tbEditedTask = _UOW.tasks.GetAll("SubTasks.Users").FirstOrDefault(t => t.TaskId == TaskId);
 
-            if (tbEditedTask == null)
+            if (tbEditedTask == null) // if the task to be edited is null return not found 
             {
                 return NotFound();
             }
             return View(tbEditedTask);
-
-            
         }
-
-
 
         [HttpPost]
         public IActionResult Edit(Task editedTask, int[] AssignedUsers)
@@ -105,31 +107,40 @@ namespace Task_Management_system.Controllers
             // Retrieve the original task from the database with related UserTasks and SubTasks
             Task orgTask = _UOW.tasks.GetAll(query => query
                 .Include(t => t.UserTasks)  
-                .Include(t => t.SubTasks))  
+                .Include(t => t.SubTasks).ThenInclude(st=>st.Users))  
                 .FirstOrDefault(t => t.TaskId == editedTask.TaskId);
 
             if (orgTask == null)
             {
                 return NotFound(); 
             }
+            // -------------Handling the file upload----------------------
             string fileName = string.Empty;
             if (editedTask.File != null)
             {
+                // combine the root Path with the Files folder
                 string myUpload = Path.Combine(_host.WebRootPath, "Files");
+                // getting the file name 
                 fileName = editedTask.File.FileName;
+                // combine the file name to the previous path to make the full path
                 string fullPath = Path.Combine(myUpload, fileName);
-               editedTask.File.CopyTo(new FileStream(fullPath, FileMode.Create));
+                // uploading the file on the Path on the server
+                editedTask.File.CopyTo(new FileStream(fullPath, FileMode.Create));
+                // save the file name in the attachment field in the database
                 orgTask.Attachment = editedTask.File.FileName;
             }
-           
+            // updating other fields
             orgTask.Description = editedTask.Description;
             orgTask.DueDate = editedTask.DueDate;
             orgTask.ProjectId = editedTask.ProjectId;
 
-            // Handle Task assigned users
+            // -------------Handling Task assigned users---------------------
+            // First:  Remove the users in Original userTasks that doesn't exist in the new assigned users
+            // Second: Add the userTasks that exist in the newAssigned users that doesn't exists in the Original userTasks.
+            // by doing this we ensure that no conflict will happen in updating the Assigned users
             if (AssignedUsers != null)
-            {
-                
+            {   
+                // getting the original Assigned users
                 var existingUserTasks = orgTask.UserTasks.ToList();
 
                 // Track which UserTasks to remove (users not in the new AssignedUsers list)
@@ -147,36 +158,41 @@ namespace Task_Management_system.Controllers
 
                     if (!userTaskExists)
                     {
+                        // Add new userTask if it doesn't exist
                         orgTask.UserTasks.Add(new UserTask
                         {
                             UserId = userId,
                             TaskId = editedTask.TaskId
                         });
+                      
                     }
                 }
             }
 
-            // Handle Subtasks
+            // -----------Handle Subtasks------------------------------------
             if (editedTask.SubTasks != null)
             {
                 // Clear existing subtasks to prevent duplicates
-                orgTask.SubTasks.Clear(); 
+                orgTask.SubTasks.Clear();
 
                 foreach (var editedSubTask in editedTask.SubTasks)
                 {
+                    // add new subtask object with the the new edited fields
                     var newSubTask = new SubTask
                     {
                         SubTaskId = editedSubTask.SubTaskId, // Ensure we set the ID if editing
                         Name = editedSubTask.Name,
                         Description = editedSubTask.Description,
                         DueDate = editedSubTask.DueDate,
-                        Users = new List<User>() 
+                        Users = new List<User>()
                     };
-
-                 
+                    //---------------------------Handling subtask users----------------------------------------
+                    // getting the current subtask to be edited
                     var existingSubTask = _UOW.subtasks.GetAll(query => query
-                        .Include(st => st.Users) 
+                        .Include(st => st.Users)
                     ).FirstOrDefault(st => st.SubTaskId == editedSubTask.SubTaskId);
+
+                    // getting the old users of the subtask to be edited, if no users exist return empty list
                     var existingUserIds = existingSubTask?.Users.Select(u => u.UserId).ToList() ?? new List<int>();
 
                     // Handle Assigned Users for each SubTask
@@ -195,22 +211,23 @@ namespace Task_Management_system.Controllers
                             }
                         }
                     }
-
+                    // finally adding the new subtask after making all the checking required
                     orgTask.SubTasks.Add(newSubTask);
                 }
             }
-            
-            
+            if (ModelState.IsValid) 
+            {
+                _UOW.tasks.Update(orgTask);
                 _UOW.SaveChanges(); 
                 return RedirectToAction("Index"); 
             
-
+            }
             // If we got this far, something failed, redisplay the form
             return View(editedTask);
         }
 
 
-
+        // Add new subTask Action
         public IActionResult AddSubTask(int TaskId)
     {
 
@@ -219,7 +236,6 @@ namespace Task_Management_system.Controllers
         ViewBag.usersList = new SelectList(users, "UserId", "Name");
         return View();
     }
-
 
     [HttpPost]
     public IActionResult AddSubTask(SubTask subtask, int[] AssignedUsers)
@@ -244,6 +260,7 @@ namespace Task_Management_system.Controllers
         return View();
     }
 
+        // Delete Task Action
         public ActionResult Delete(int id)
         {
             _UOW.tasks.Delete(id);
