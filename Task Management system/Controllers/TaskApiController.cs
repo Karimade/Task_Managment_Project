@@ -28,7 +28,6 @@ namespace Task_Management_system.Controllers
             try
             {
                 var tasks = _UOW.tasks.GetFilteredTasks(projectId, userId, dueDateFrom, dueDateTo);
-                //// Check if tasks are null and return an empty array if true
                 if (tasks == null)
                 {
                     return NotFound("No Such Data Exists!");
