@@ -88,11 +88,7 @@ namespace Task_Management_system.Controllers
             IEnumerable<User> users = _UOW.users.GetAll();
             ViewBag.Users = new SelectList(users, "UserId", "Name", new { });
 
-            // This takes long time when displaying the edit view
-            //Task tbEditedTask = _UOW.tasks.GetTaskById(TaskId);
-
-            // This takes less time , but it will not show the Old assigned users when editing 
-            Task tbEditedTask = _UOW.tasks.GetAll("SubTasks.Users").FirstOrDefault(t => t.TaskId == TaskId);
+           Task tbEditedTask = _UOW.tasks.GetTaskById(TaskId);
 
             if (tbEditedTask == null) // if the task to be edited is null return not found 
             {
