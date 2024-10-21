@@ -50,14 +50,15 @@ namespace Task_Management_system.Data.Repositories
         // Getting a task by id 
         public Task GetTaskById(int taskId)
         {
-                return _context.tasks
-                    .Where(t => t.TaskId == taskId)                                     // Filter first by taskId
-                    .Include(t => t.SubTasks).ThenInclude(st => st.Users)              // Include related entities after filtering
+           var task =  _context.tasks
+                .Where(t => t.TaskId == taskId)                                // Filter first by taskId
+                    .Include(t => t.SubTasks).ThenInclude(st => st.Users)      // Include related entities after filtering
                     .Include(t => t.Project)
                     .Include(t => t.UserTasks)
-                    .ThenInclude(ut => ut.User)
-                    .FirstOrDefault();                            
-
+                    .ThenInclude(ut => ut.User).AsSplitQuery()      // Split Query to improve performance
+                    .FirstOrDefault();
+           
+                return task;    
         }
 
         // Get the last [count] Over due tasks
